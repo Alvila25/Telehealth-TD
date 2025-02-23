@@ -10,7 +10,7 @@ export default function EduScreen() {
     const fetchContent = async () => {
       const token = await AsyncStorage.getItem('token');
       try {
-        const res = await axios.get('https://telehealth-tcd.herokuapp.com/api/content/edu', {
+        const res = await axios.get('https://telehealth-td.herokuapp.com/api/content/edu', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setContent(res.data);
