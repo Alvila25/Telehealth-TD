@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   await User.update({ twoFactorCode: code }, { where: { phone } });
   await twilio.messages.create({
-    body: `Your Telehealth-TCD 2FA code is ${code}`,
+    body: `Your Telehealth-TD 2FA code is ${code}`,
     from: process.env.TWILIO_PHONE,
     to: phone
   });
