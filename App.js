@@ -1,58 +1,63 @@
-// Load environment variables first
+// Load environment variables
 require('dotenv').config();
 
-// Import required modules from your package.json dependencies
+// Import core modules
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io'); // Using socket.io correctly
+const { Server } = require('socket.io');
 const { Sequelize } = require('sequelize');
 
-// Initialize Express app and HTTP server
+// Setup app and server
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server); // Socket.io setup with the HTTP server
+const io = new Server(server);
 
-// Middleware to parse JSON requests
+// Middleware
 app.use(express.json());
 
-// Sequelize database setup (replace with your actual DB credentials from .env)
+// Database setup
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
+  process.env.DATABASE_URL || {
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
     host: process.env.DB_HOST,
-    dialect: 'postgres', // Using 'pg' from your dependencies
-    logging: false, // Set to true if you want SQL logs
+    dialect: 'postgres',
+    logging: false,
   }
 );
 
-// Test database connection
+// Test DB connection
 sequelize.authenticate()
   .then(() => console.log('Database connected, bro!'))
   .catch(err => console.error('DB connection failed:', err));
 
-// Socket.io connection handling
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/appointments', require('./routes/appointments'));
+app.use('/api/records', require('./routes/records'));
+app.use('/api/content', require('./routes/content'));
+
+// Socket.IO chat
 io.on('connection', (socket) => {
   console.log('A user connected, yo!');
-  socket.on('disconnect', () => {
-    console.log('User bounced, peace out!');
-  });
-  // Add your custom socket events here
+  socket.on('join', (room) => socket.join(room));
+  socket.on('chat', ({ room, message }) => io.to(room).emit('chat', message));
+  socket.on('disconnect', () => console.log('User bounced, peace out!'));
 });
 
-// Basic route to test the server
-app.get('/', (req, res) => {
-  res.send('Telehealth backend is live, my dude!');
-});
+// Root route
+app.get('/', (req, res) => res.send('Telehealth-TCD Backend is live, my dude!'));
 
-// Start the server
+// Start server
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}, let’s go!`);
-});
+sequelize.sync({ alter: true })
+  .then(() => {
+    server.listen(PORT, () => console.log(`Server vibin’ on port ${PORT}, let’s go!`));
+  })
+  .catch(err => console.error('DB sync failed:', err));
 
-// Handle graceful shutdown
+// Graceful shutdown
 process.on('SIGTERM', () => {
   server.close(() => {
     sequelize.close();
