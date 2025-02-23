@@ -16,7 +16,7 @@ export default function RecordsScreen() {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
     });
     setHistory('');
-    setGreenhouse('');
+    settTelehealth('');
   };
 
   return (
