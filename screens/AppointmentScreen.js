@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AgoraUIKit from 'react-native-agora';
 import io from 'socket.io-client';
 
-const socket = io('https://telehealth-tcd.herokuapp.com');
+const socket = io('https://telehealth-td.herokuapp.com');
 
 export default function AppointmentScreen() {
   const [doctors, setDoctors] = useState([]);
@@ -16,7 +16,7 @@ export default function AppointmentScreen() {
   useEffect(() => {
     const fetchDoctors = async () => {
       const token = await AsyncStorage.getItem('token');
-      const res = await axios.get('https://telehealth-tcd.herokuapp.com/api/appointments/queue', {
+      const res = await axios.get('https://telehealth-td.herokuapp.com/api/appointments/queue', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDoctors(res.data);
@@ -30,7 +30,7 @@ export default function AppointmentScreen() {
   const bookAndCall = async (doctorId) => {
     const token = await AsyncStorage.getItem('token');
     const res = await axios.post(
-      'https://telehealth-tcd.herokuapp.com/api/appointments/book',
+      'https://telehealth-td.herokuapp.com/api/appointments/book',
       { doctorId, date: new Date() },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -41,7 +41,7 @@ export default function AppointmentScreen() {
   };
 
   const agoraProps = {
-    connectionData: { appId: 'YOUR_AGORA_APP_ID', channel: chatRoom || 'telehealth-tcd' },
+    connectionData: { appId: 'YOUR_AGORA_APP_ID', channel: chatRoom || 'telehealth-td' },
     rtcCallbacks: { EndCall: () => setInCall(false) },
   };
 
