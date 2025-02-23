@@ -1,0 +1,4 @@
+npx react-native init TelehealthTCD
+cd TelehealthTCD
+npm install @react-navigation/native @react-navigation/stack axios @react-native-async-storage/async-storage react-native-agora socket.io-client @react-native-community/push-notification-ios i18n-js
+npx pod-install
