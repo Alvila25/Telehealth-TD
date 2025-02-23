@@ -11,7 +11,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      await axios.post('https://telehealth-tcd.herokuapp.com/api/auth/login', { phone, password });
+      await axios.post('https://telehealth-td.herokuapp.com/api/auth/login', { phone, password });
       setStep('2fa');
     } catch (error) {
       console.log('Login failed:', error);
@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation }) {
 
   const handle2FA = async () => {
     try {
-      const res = await axios.post('https://telehealth-tcd.herokuapp.com/api/auth/verify-2fa', { phone, code });
+      const res = await axios.post('https://telehealth-td.herokuapp.com/api/auth/verify-2fa', { phone, code });
       await AsyncStorage.setItem('token', res.data.token);
       navigation.navigate('Home');
     } catch (error) {
