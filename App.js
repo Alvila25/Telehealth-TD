@@ -1,5 +1,11 @@
 // Load environment variables
-require('dotenv').config();
+try {
+  require('dotenv').config();
+  console.log('Dotenv loaded, bro!');
+} catch (err) {
+  console.error('Dotenv failed:', err);
+  process.exit(1);
+}
 
 // Import core modules
 const express = require('express');
@@ -32,11 +38,25 @@ sequelize.authenticate()
   .then(() => console.log('Database connected, bro!'))
   .catch(err => console.error('DB connection failed:', err));
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/records', require('./routes/records'));
-app.use('/api/content', require('./routes/content'));
+// Load routes safely
+const loadRoute = (path) => {
+  try {
+    return require(path);
+  } catch (err) {
+    console.error(`Failed to load ${path}:`, err);
+    return null;
+  }
+};
+
+const authRoutes = loadRoute('./routes/auth');
+const appointmentRoutes = loadRoute('./routes/appointments');
+const recordRoutes = loadRoute('./routes/records');
+const contentRoutes = loadRoute('./routes/content');
+
+if (authRoutes) app.use('/api/auth', authRoutes);
+if (appointmentRoutes) app.use('/api/appointments', appointmentRoutes);
+if (recordRoutes) app.use('/api/records', recordRoutes);
+if (contentRoutes) app.use('/api/content', contentRoutes);
 
 // Socket.IO chat
 io.on('connection', (socket) => {
@@ -50,12 +70,15 @@ io.on('connection', (socket) => {
 app.get('/', (req, res) => res.send('Telehealth-TCD Backend is live, my dude!'));
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Heroku sets PORT, so this is key
 sequelize.sync({ alter: true })
   .then(() => {
     server.listen(PORT, () => console.log(`Server vibin’ on port ${PORT}, let’s go!`));
   })
-  .catch(err => console.error('DB sync failed:', err));
+  .catch(err => {
+    console.error('DB sync failed:', err);
+    process.exit(1);
+  });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
